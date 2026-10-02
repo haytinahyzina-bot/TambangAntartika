@@ -75,6 +75,11 @@ local function PromptPos(pr)
   if m then local ok, cf = pcall(function() return m:GetPivot() end) if ok then return cf.Position end end
   return nil
 end
+local function FirstBasePart(inst)
+  if not inst then return nil end
+  if inst:IsA("BasePart") then return inst end
+  return inst:FindFirstChildWhichIsA("BasePart", true)
+end
 
 local function FirePrompt(pr)
   -- 1) executor fire (bypass hold)
@@ -135,9 +140,42 @@ local function DoorTargets()
 end
 
 -- LOOPS (tidak ada teleport di sini, murni fire dalam radius)
+-- AUTO STEAL: prompt milik StealableItems + prompt APAPUN yang dekat barang curian
+-- (prompt $1.00K dkk nempel di meja/furniture, bukan di folder StealableItems)
 task.spawn(function()
   while true do
-    if Cfg.AutoSteal then pcall(function() FireNearby(StealTargets, Cfg.StealRadius) end) end
+    if Cfg.AutoSteal then pcall(function()
+      local hrp = HRP() local m = Map() local f = StealFolder()
+      if not hrp or not m or not f then return end
+      -- posisi semua barang curian
+      local spots = {}
+      for _, it in ipairs(f:GetChildren()) do
+        local p = FirstBasePart(it)
+        if p then table.insert(spots, p.Position) end
+      end
+      local function nearSteal(pos, r)
+        for _, s in ipairs(spots) do
+          if (s - pos).Magnitude <= r then return true end
+        end
+        return false
+      end
+      for _, pr in ipairs(m:GetDescendants()) do
+        if pr:IsA("ProximityPrompt") and pr.Enabled then
+          local act = string.upper(pr.ActionText or "")
+          if act ~= "OPEN" and act ~= "CLOSE" and act ~= "LOCKED" and not act:find("HACK") then
+            local maxD = tonumber(pr.MaxActivationDistance or 999) or 999
+            local p = PromptPos(pr)
+            if p then
+              local d = (p - hrp.Position).Magnitude
+              if d <= Cfg.StealRadius and d <= math.max(maxD + 2, 8) and nearSteal(p, 14) then
+                FirePrompt(pr)
+                FiredDbg.n += 1 FiredDbg.name = "STEAL:"..((pr.Parent and pr.Parent.Name) or "?"):sub(1,18)
+              end
+            end
+          end
+        end
+      end
+    end) end
     task.wait(0.35)
   end
 end)
