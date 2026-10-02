@@ -1,6 +1,7 @@
 -- MERAMPOK Farm No.1 + ESP No.2 (teleport PISAH, semua ON/OFF)
 -- PlaceId 83907398368798 | Map: Workspace.Map
 -- Cara pakai: execute di Solara/Xeno. Semua default OFF.
+print("[MR] start execute...")
 local Players = game:GetService("Players")
 local LP = Players.LocalPlayer
 
@@ -539,9 +540,12 @@ end
 
 -- ============ UI MODERN MINIMALIST (tab + grup) ============
 local gui = Instance.new("ScreenGui") gui.Name = "MerampokNo1No2" gui.ResetOnSpawn = false
-gui.DisplayOrder = 1 gui.IgnoreGuiInset = false
-pcall(function() gui.Parent = game:GetService("CoreGui") end)
+gui.DisplayOrder = 999 gui.IgnoreGuiInset = false
+-- PlayerGui dulu (CoreGui sering dibersihkan anti-cheat game ini)
+pcall(function() gui.Parent = LP:WaitForChild("PlayerGui", 5) end)
+if not gui.Parent then pcall(function() gui.Parent = game:GetService("CoreGui") end) end
 if not gui.Parent then gui.Parent = LP.PlayerGui end
+print("[MR] gui parent:", tostring(gui.Parent))
 
 local ACC = Color3.fromRGB(90,140,255)
 local BG = Color3.fromRGB(13,15,22)
@@ -568,7 +572,7 @@ sideT.Text = "  MERAMPOK" sideT.Font = Enum.Font.GothamBold sideT.TextSize = 14
 sideT.TextColor3 = TXT sideT.TextXAlignment = Enum.TextXAlignment.Left sideT.Parent = side
 local sideS = Instance.new("TextLabel")
 sideS.Size = UDim2.new(1,0,0,16) sideS.Position = UDim2.new(0,0,0,32)
-sideS.BackgroundTransparency = 1 sideS.Text = "  v2 • minimalist"
+sideS.BackgroundTransparency = 1 sideS.Text = "  v2 â€¢ minimalist"
 sideS.Font = Enum.Font.Gotham sideS.TextSize = 10 sideS.TextColor3 = DIM
 sideS.TextXAlignment = Enum.TextXAlignment.Left sideS.Parent = side
 
@@ -654,7 +658,7 @@ local function Stepper(pg, t, get, set, min, max, step)
   lab.TextColor3 = TXT lab.TextXAlignment = Enum.TextXAlignment.Left lab.Parent = f
   local minus = Instance.new("TextButton")
   minus.Size = UDim2.new(0,28,0,22) minus.Position = UDim2.new(1,-62,0.5,-11)
-  minus.BackgroundColor3 = Color3.fromRGB(38,42,58) minus.Text = "−"
+  minus.BackgroundColor3 = Color3.fromRGB(38,42,58) minus.Text = "âˆ’"
   minus.Font = Enum.Font.GothamBold minus.TextSize = 14 minus.TextColor3 = TXT minus.Parent = f
   Instance.new("UICorner", minus).CornerRadius = UDim.new(0,6)
   local plus = Instance.new("TextButton")
@@ -670,7 +674,7 @@ end
 -- ===== isi tab =====
 do local pg = pages["Farm"]
   Sec(pg, "Auto")
-  Tog(pg, "Auto E — semua prompt", function() return Cfg.AutoE end, function(v) Cfg.AutoE = v end)
+  Tog(pg, "Auto E â€” semua prompt", function() return Cfg.AutoE end, function(v) Cfg.AutoE = v end)
   Tog(pg, "Auto Steal", function() return Cfg.AutoSteal end, function(v) Cfg.AutoSteal = v end)
   Tog(pg, "Auto HACK", function() return Cfg.AutoHack end, function(v) Cfg.AutoHack = v end)
   Tog(pg, "Auto Door", function() return Cfg.AutoDoor end, function(v) Cfg.AutoDoor = v end)
@@ -679,7 +683,7 @@ do local pg = pages["Farm"]
   Stepper(pg, "E radius", function() return Cfg.ERadius end, function(v) Cfg.ERadius = v end, 8, 25, 1)
 end
 do local pg = pages["Teleport"]
-  Sec(pg, "Manual — tekan sekali jalan")
+  Sec(pg, "Manual â€” tekan sekali jalan")
   Btn(pg, "Money terdekat", function() local p = NearestSteal("money") if p then TPto(p) end end, true)
   Btn(pg, "Gem terdekat", function() local p = NearestSteal("gem") if p then TPto(p) end end, true)
   Btn(pg, "HACK terdekat", function()
@@ -760,8 +764,8 @@ task.spawn(function()
       local m = Map()
       local ns = StealFolder() and #StealFolder():GetChildren() or 0
       local susp = m and m:FindFirstChild("SuspiciousAmount")
-      status.Text = ns .. " steal • susp " .. tostring(susp and math.floor(susp.Value * 100) / 100 or "?")
-        .. " • fire " .. tostring(FiredDbg.n) .. " " .. tostring(FiredDbg.name):sub(1, 22)
+      status.Text = ns .. " steal â€¢ susp " .. tostring(susp and math.floor(susp.Value * 100) / 100 or "?")
+        .. " â€¢ fire " .. tostring(FiredDbg.n) .. " " .. tostring(FiredDbg.name):sub(1, 22)
     end)
     task.wait(1)
   end
